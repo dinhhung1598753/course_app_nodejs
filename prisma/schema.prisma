@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int          @id @unique @default(autoincrement())
+  email          String       @unique
+  password       String
+  fullName       String
+  phoneNumber    String
+  gender         String
+  role           Role         @default(STUDENT)
+  dob            DateTime     @db.Date
+  address        String
+  userCourse     UserCourse[]
+  course Course[]
+}
+
+model Course {
+  key         String       @id
+  name        String
+  description String
+  teacherId   Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user      User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  userCourses UserCourse[]
+  lessons     Lesson[]
+  documents   Document[]
+
+}
+
+model UserCourse {
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courceKey String
+  cource    Course @relation(fields: [courceKey], references: [key], onDelete: Cascade)
+
+  @@id([userId, courceKey])
+}
+
+model Lesson {
+  key         String   @id
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseKey], references: [key], onDelete: Cascade)
+  courseKey   String
+}
+
+model Document {
+  key         String   @id
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseKey], references: [key], onDelete: Cascade)
+  courseKey   String
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  MANAGER
+}
