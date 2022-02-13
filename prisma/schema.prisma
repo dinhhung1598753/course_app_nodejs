@@ -11,17 +11,17 @@ datasource db {
 }
 
 model User {
-  id             Int          @id @unique @default(autoincrement())
-  email          String       @unique
-  password       String
-  fullName       String
-  phoneNumber    String
-  gender         String
-  role           Role         @default(STUDENT)
-  dob            DateTime     @db.Date
-  address        String
-  userCourse     UserCourse[]
-  course Course[]
+  id          Int          @id @unique @default(autoincrement())
+  email       String       @unique
+  password    String
+  fullName    String
+  phoneNumber String
+  gender      String
+  role        Role         @default(STUDENT)
+  dob         DateTime     @db.Date
+  address     String
+  userCourse  UserCourse[]
+  course      Course[]
 }
 
 model Course {
@@ -31,40 +31,32 @@ model Course {
   teacherId   Int
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  user      User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   userCourses UserCourse[]
   lessons     Lesson[]
-  documents   Document[]
 
 }
 
 model UserCourse {
   userId    Int
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courceKey String
-  cource    Course @relation(fields: [courceKey], references: [key], onDelete: Cascade)
+  courseKey String
+  course    Course @relation(fields: [courseKey], references: [key], onDelete: Cascade)
+  progess   Int    @default(1)
 
-  @@id([userId, courceKey])
+  @@id([userId, courseKey])
 }
 
 model Lesson {
   key         String   @id
   name        String
   description String
+  videoId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   course      Course   @relation(fields: [courseKey], references: [key], onDelete: Cascade)
   courseKey   String
-}
-
-model Document {
-  key         String   @id
-  name        String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  course      Course   @relation(fields: [courseKey], references: [key], onDelete: Cascade)
-  courseKey   String
+  avatar      String  @default("")
 }
 
 enum Role {

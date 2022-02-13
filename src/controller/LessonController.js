@@ -1,41 +1,26 @@
 const { PrismaClient } = require('@prisma/client');
-const { course, user } = new PrismaClient();
-const nodemailer = require('nodemailer');
+const { lesson, course, user } = new PrismaClient();
 const Utils = require('./utils/Utils');
 
-class CourseController {
+class LessonController {
 
 
 
   /** 
    * [GET]
-   * /courses
+   * /lessons
    * 
   */
-  async index(req, res, next){
-    var userId = await Utils.getUserId(req);
-    if(userId){
-      user.findUnique({
-        where: {
-          id: userId
-        }
-      }).then((user)=>{
-        if(user.role == "MANAGER"){
-          course.findMany().then((courses) => res.status(200).json({courses}))
-        }else{
-          course.findMany({
-            where:{
-              teacherId : userId
-            }
-          }).then(courses => {
-            res.status(200).json(courses)
-          })
-        }
-      });
-    }
-    else{
-      res.status(403)
-    }
+  async index(req, res, next) {
+    var courseKey = req.query.courseKey;
+
+    lesson.findMany({
+      where: {
+        courseKey: courseKey
+      }
+    }).then(courses => {
+      res.status(200).json(courses)
+    })
   }
 
 
@@ -45,27 +30,44 @@ class CourseController {
    */
   async create(req, res, next) {
     
-    const newCourse = req.body;
+    let url = req.protocol + '://' + req.get('host')
+    url = url + '/public/images/' + req.file.filename
+    const {key, name, courseKey, description, videoId} = req.body;
+    const newLesson =  {
+      key,
+      name,
+      courseKey,
+      description, 
+      videoId,
+      avatar: url
+    }
 
-    const checkCourseExist = await course.findUnique({
+    const checkLessonExist = await lesson.findUnique({
       where: {
-        key: newCourse.key
+        key: key
       }
     });
-    if (checkCourseExist) {
-      return res.send('CourseKey has been used!')
+    if (checkLessonExist) {
+      return res.send('LessonKey has been used!')
     }
-    var userId = await Utils.getUserId(req);
-    console.log(userId)
-    if(userId){
-      newCourse.teacherId = userId;
-      course.create({
-        data: newCourse
-      })
-        .then((course) => {
-          return res.status(200).send("OK")
-        });
-    }
+    // var userId = await Utils.getUserId(req);
+    // console.log(userId)
+    // if(userId){
+    //   newCourse.teacherId = userId;
+    //   course.create({
+    //     data: newCourse
+    //   })
+    //     .then((course) => {
+    //       return res.status(200).send("OK")
+    //     });
+    // }
+
+    lesson.create({
+      data:newLesson
+    })
+      .then((lesson) => {
+        return res.status(200).send("OK")
+      });
     return res.status(403)
   }
 
@@ -76,7 +78,7 @@ class CourseController {
    * /courses
    */
   async update(req, res, next) {
-    
+
     const newCourse = req.body;
 
     const courseExist = await course.findUnique({
@@ -89,7 +91,7 @@ class CourseController {
     }
     newCourse.teacherId = courseExist.teacherId;
     course.update({
-      where:{
+      where: {
         key: newCourse.key
       },
       data: newCourse
@@ -97,7 +99,7 @@ class CourseController {
       .then((course) => {
         return res.status(200).send("OK")
       });
-    
+
     return res.status(403)
   }
 
@@ -105,13 +107,13 @@ class CourseController {
    * [DELETE]
    * /courses/:key
    */
-  delete(req, res, next){
+  delete(req, res, next) {
     const key = req.params.key;
     course.delete({
       where: {
         key: key
       }
-    }).then(course=> res.status(200).send(course))
+    }).then(course => res.status(200).send(course))
   }
 
 
@@ -137,4 +139,4 @@ class CourseController {
   }
 }
 
-module.exports = new CourseController()
+module.exports = new LessonController()

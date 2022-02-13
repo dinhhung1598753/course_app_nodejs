@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
-const { user } = new PrismaClient();
+const { user, userCourse, course } = new PrismaClient();
 const bcrypt = require('bcrypt');
+const Utils = require('./utils/Utils');
 
 class UserController {
   /**
@@ -36,6 +37,53 @@ class UserController {
   index(req, res, next) {
     user.findMany()
       .then(users => res.send(users))
+  }
+
+  async addCourse(req, res, next) {
+    const userId = await Utils.getUserId(req);
+    const newUserCourse = req.body;
+    newUserCourse.userId = userId;
+    const exist = await userCourse.findMany({
+      where: {
+        userId: userId,
+        courseKey: newUserCourse.courseKey
+      }
+    });
+    if (exist) {
+      res.send("Khóa học đã được đăng kí")
+    }
+    else {
+      userCourse.create({
+        data: newUserCourse
+      })
+        // .then(user => res.send(user))
+        .then(userCourse => res.send("OK"))
+        .catch(err => res.send(err.message))
+    }
+  }
+
+  async getCourses(req, res, next) {
+    const userId = await Utils.getUserId(req);
+    course.findMany({
+      where: {
+        userCourses: {
+          some: {
+            user: {
+              id: userId
+            },
+          }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id:true,
+            fullName: true,
+          },
+        }
+      }
+    }).then(courses => res.send(courses))
+      .catch(error => res.send(error))
   }
 
   show(req, res, next) {
@@ -94,7 +142,7 @@ class UserController {
         password: hashPassword
       }
     })
-    .then(() => res.send('Change Password successfully!'))
+      .then(() => res.send('Change Password successfully!'))
   }
 }
 
