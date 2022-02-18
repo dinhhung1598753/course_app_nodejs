@@ -49,7 +49,7 @@ class UserController {
         courseKey: newUserCourse.courseKey
       }
     });
-    if (exist) {
+    if (exist.length > 0) {
       res.send("Khóa học đã được đăng kí")
     }
     else {
@@ -86,40 +86,40 @@ class UserController {
       .catch(error => res.send(error))
   }
 
-  show(req, res, next) {
-    user.findFirst({
-      where: {
-        id: parseInt(req.params.userId)
-      }
-    })
-      .then(user => res.send(user))
-  }
+  // show(req, res, next) {
+  //   user.findFirst({
+  //     where: {
+  //       id: parseInt(req.params.userId)
+  //     }
+  //   })
+  //     .then(user => res.send(user))
+  // }
 
-  updateProfile(req, res, next) {
-    const newProfile = req.body;
-    if (newProfile.dob) {
-      newProfile.dob = new Date(newProfile.dob);
-    }
-    user.update({
-      where: {
-        id: parseInt(req.params.userId)
-      },
-      data: newProfile
-    })
-      .then(user => res.send(user))
-  }
+  // updateProfile(req, res, next) {
+  //   const newProfile = req.body;
+  //   if (newProfile.dob) {
+  //     newProfile.dob = new Date(newProfile.dob);
+  //   }
+  //   user.update({
+  //     where: {
+  //       id: parseInt(req.params.userId)
+  //     },
+  //     data: newProfile
+  //   })
+  //     .then(user => res.send(user))
+  // }
 
-  updateRole(req, res, next) {
-    user.update({
-      where: {
-        id: parseInt(req.params.userId)
-      },
-      data: {
-        role: "MANAGER"
-      }
-    })
-      .then(user => res.send(user))
-  }
+  // updateRole(req, res, next) {
+  //   user.update({
+  //     where: {
+  //       id: parseInt(req.params.userId)
+  //     },
+  //     data: {
+  //       role: "MANAGER"
+  //     }
+  //   })
+  //     .then(user => res.send(user))
+  // }
 
   delete(req, res, next) {
     user.delete({
@@ -130,20 +130,20 @@ class UserController {
       .then(user => res.send(user))
   }
 
-  async changePassword(req, res, next) {
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(req.body.newPassword, salt);
+  // async changePassword(req, res, next) {
+  //   const salt = await bcrypt.genSalt(10);
+  //   const hashPassword = await bcrypt.hash(req.body.newPassword, salt);
 
-    user.update({
-      where: {
-        id: parseInt(req.params.userId)
-      },
-      data: {
-        password: hashPassword
-      }
-    })
-      .then(() => res.send('Change Password successfully!'))
-  }
+  //   user.update({
+  //     where: {
+  //       id: parseInt(req.params.userId)
+  //     },
+  //     data: {
+  //       password: hashPassword
+  //     }
+  //   })
+  //     .then(() => res.send('Change Password successfully!'))
+  // }
 }
 
 module.exports = new UserController()

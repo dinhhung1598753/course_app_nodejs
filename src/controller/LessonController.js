@@ -26,7 +26,7 @@ class LessonController {
 
   /**
    * [POST]
-   * /courses
+   * /lessons
    */
   async create(req, res, next) {
     
@@ -75,7 +75,7 @@ class LessonController {
   /**
    * 
    * [PUT]
-   * /courses
+   * /lessons
    */
   async update(req, res, next) {
 
@@ -120,7 +120,7 @@ class LessonController {
   /**
    * 
    * [GET]
-   * /courses/search
+   * /lessons/search
    */
   search(req, res, next) {
     const searchValue = req.query.searchValue || '';
