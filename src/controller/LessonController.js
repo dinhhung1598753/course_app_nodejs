@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const { lesson, course, user } = new PrismaClient();
-const Utils = require('./utils/Utils');
 
 class LessonController {
 
@@ -79,22 +78,36 @@ class LessonController {
    */
   async update(req, res, next) {
 
-    const newCourse = req.body;
+    let url = req.protocol + '://' + req.get('host')
+    url = req.file ?  (url + '/public/images/' + req.file.filename) : null;
+    const {key, name, courseKey, description, videoId} = req.body;
+    const newLesson =  {
+      key,
+      name,
+      courseKey,
+      description, 
+      videoId,
+      avatar: url
+    }
 
-    const courseExist = await course.findUnique({
+    const lessonExist = await lesson.findUnique({
       where: {
-        key: newCourse.key
+        key: newLesson.key
       }
     });
-    if (!courseExist) {
-      return res.send('Course not found!')
+    if (!newLesson) {
+      return res.send('Lesson not found!')
     }
-    newCourse.teacherId = courseExist.teacherId;
-    course.update({
+    lessonExist.name = newLesson.name ?? lessonExist.name
+    lessonExist.description = newLesson.description ?? lessonExist.description
+    lessonExist.videoId = newLesson.videoId ?? lessonExist.videoId
+    lessonExist.avatar = newLesson.name ?? lessonExist.avatar
+
+    lesson.update({
       where: {
-        key: newCourse.key
+        key: newLesson.key
       },
-      data: newCourse
+      data: newLesson
     })
       .then((course) => {
         return res.status(200).send("OK")
@@ -105,15 +118,15 @@ class LessonController {
 
   /**
    * [DELETE]
-   * /courses/:key
+   * /lessons/:key
    */
   delete(req, res, next) {
     const key = req.params.key;
-    course.delete({
+    lesson.delete({
       where: {
         key: key
       }
-    }).then(course => res.status(200).send(course))
+    }).then(lesson => res.status(200).send(lesson))
   }
 
 

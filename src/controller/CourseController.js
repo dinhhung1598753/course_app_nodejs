@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
-const { course, user } = new PrismaClient();
+const { course, user, userCourse } = new PrismaClient();
 const nodemailer = require('nodemailer');
-const Utils = require('./utils/Utils');
 
 class CourseController {
 
@@ -13,7 +12,7 @@ class CourseController {
    * 
   */
   async index(req, res, next){
-    var userId = await Utils.getUserId(req);
+    var userId = req.userId
     if(userId){
       user.findUnique({
         where: {
@@ -55,7 +54,7 @@ class CourseController {
     if (checkCourseExist) {
       return res.send('CourseKey has been used!')
     }
-    var userId = await Utils.getUserId(req);
+    var userId = req.userId
     console.log(userId)
     if(userId){
       newCourse.teacherId = userId;
@@ -128,6 +127,25 @@ class CourseController {
         name: {
           contains: searchValue
         }
+      },
+    })
+      .then(tours => {
+        console.log(tours);
+        res.send(tours);
+      });
+  }
+
+
+  /**
+   * 
+   * [GET]
+   * /courses/subscribe
+   */
+   countSubscribe(req, res, next) {
+    const courseKey = req.query.courseKey || '';
+    userCourse.count({
+      where: {
+        courseKey: courseKey
       },
     })
       .then(tours => {

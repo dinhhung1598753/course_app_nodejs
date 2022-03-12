@@ -25,12 +25,13 @@ class LoginController {
           bcrypt.compare(req.body.password, user.password)
             .then(async function (result) {
               if (result) {
-                const token = await jwt.sign(
+                const token = await  jwt.sign(
                   { user_id: user.id },
                   process.env.JWTSECRET,
                   { expiresIn: '2h' }
                 );
                 res.cookie('token', token);
+                // req.token(token)
                 res.send(token);
               }
               else {
@@ -45,14 +46,12 @@ class LoginController {
   }
 
   me(req, res, auth) {
+    const token = req.cookies.token;
 
     const accessTokenFromHeader = req.headers.authorization.replace("Bearer ", "");
-    // console.log("header", req.headers);
-    // console.log("token",accessTokenFromHeader)
     if (!accessTokenFromHeader) {
       res.status(401).send('Không tìm thấy access token!');
     }
-
     const accessTokenSecret = process.env.JWTSECRET;
     try {
       verify(
@@ -66,21 +65,18 @@ class LoginController {
             .send('Bạn không có quyền truy cập vào tính năng này!');
         }
     
-        // console.log("verified is ", verified.user_id);
-    
         user.findUnique({
           where: {
             id: verified.user_id
           }
         }).then((user)=>{
-          // console.log("user is ", user);
           res.status(200).json({
-            // user: {
-            //   id : user.id,
-            //   fullname: user.fullName,
-            //   role: user.role
-            // }
-            user : user
+            user: {
+              id : user.id,
+              fullName: user.fullName,
+              role: user.role
+            }
+            // user : user
           })
         });
     

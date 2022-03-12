@@ -33,5 +33,7 @@ var upload = multer({
 
 router.get('/', lessonController.index);
 router.post('/', upload.single('imageFile'), lessonController.create);
+router.put('/', upload.single('imageFile'), lessonController.update);
+router.delete('/:key', lessonController.delete);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const { user, userCourse, course } = new PrismaClient();
 const bcrypt = require('bcrypt');
-const Utils = require('./utils/Utils');
+
 
 class UserController {
   /**
@@ -40,7 +40,7 @@ class UserController {
   }
 
   async addCourse(req, res, next) {
-    const userId = await Utils.getUserId(req);
+    const userId = req.userId
     const newUserCourse = req.body;
     newUserCourse.userId = userId;
     const exist = await userCourse.findMany({
@@ -63,8 +63,8 @@ class UserController {
   }
 
   async getCourses(req, res, next) {
-    const userId = await Utils.getUserId(req);
-    course.findMany({
+    const userId = req.userId
+    let courses = await course.findMany({
       where: {
         userCourses: {
           some: {
@@ -77,22 +77,31 @@ class UserController {
       include: {
         user: {
           select: {
-            id:true,
+            id: true,
             fullName: true,
           },
         }
       }
-    }).then(courses => res.send(courses))
-      .catch(error => res.send(error))
+    });
+
+    for (let i = 0; i < courses.length; i++) {
+      courses[i].countSubscribe = await userCourse.count({
+        where: {
+          courseKey: courses[i].key
+        },
+      })
+    }
+    res.send(courses)
+
   }
 
-  // show(req, res, next) {
-  //   user.findFirst({
+  // async show(req, res, next) {
+  //   const u = await user.findFirst({
   //     where: {
   //       id: parseInt(req.params.userId)
   //     }
   //   })
-  //     .then(user => res.send(user))
+  //   res.send(u)
   // }
 
   // updateProfile(req, res, next) {
@@ -144,6 +153,12 @@ class UserController {
   //   })
   //     .then(() => res.send('Change Password successfully!'))
   // }
+
+
+
+  
+  
 }
+
 
 module.exports = new UserController()
