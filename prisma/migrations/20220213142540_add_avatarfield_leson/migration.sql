@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `lesson` ADD COLUMN `avatar` VARCHAR(191) NOT NULL DEFAULT '';

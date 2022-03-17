@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 
 
 function route(app) {
-  app.use('/users',auth.requireAuth,  userRouter);
+  app.use('/users',  userRouter);
   app.use('/login',  loginRouter);
   app.use('/courses', auth.requireAuth,  courseRouter);
   app.use('/lessons', auth.requireAuth,  lessonRouter);
